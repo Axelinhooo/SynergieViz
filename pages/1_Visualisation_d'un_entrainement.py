@@ -4,9 +4,6 @@ from streamlit_echarts import st_echarts
 import plotly.graph_objects as go
 from datetime import datetime
 
-st.title("Welcome to SynergieViz")
-st.write("This is the landing page of your SynergieViz application.")
-
 def data_import():
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     if uploaded_file is not None:
@@ -25,6 +22,7 @@ def create_histogram(data):
     fail_data = jump_stats[0].tolist()
 
     options = {
+        "title": {"text": "Répartition des sauts par type"},
         "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
         "grid": {"left": "3%", "right": "4%", "bottom": "3%", "containLabel": True},
         "xAxis": {"type": "category", "data": x_axis},
@@ -40,7 +38,7 @@ def create_histogram(data):
                 "color": "green"
             },
             {
-                "name": "Raté",
+                "name": "Chute",
                 "type": "bar",
                 "stack": "total",
                 "label": {"show": True},
@@ -50,9 +48,14 @@ def create_histogram(data):
             }
         ]
     }
+    # add an on click event to the chart
+    options["events"] = [{"click": "function(params) {alert('You clicked on ' + params.value)}"}]
 
-    st_echarts(options=options, height="500px")
+    st_echarts(options, height="500px")
+    
 
+
+        
 def create_timeline(df):
     # Conversion des timestamps en objets datetime
     df['videoTimestamp'] = df['videoTimeStamp'].apply(lambda x: datetime.strptime(x, '%M:%S'))
@@ -77,7 +80,7 @@ def create_timeline(df):
     fig.update_layout(
         xaxis_title='Timestamp (min:sec)',
         yaxis_title='Rotations',
-        title='Données de patinage artistique'
+        title='Timeline de l\'entrainement'
     )
 
     # Affichage du graphique dans Streamlit
