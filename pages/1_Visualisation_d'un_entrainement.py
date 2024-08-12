@@ -103,8 +103,12 @@ if st.session_state.logged_in:
     if role == 'COACH':
         # Afficher une liste déroulante pour sélectionner un athlète
         selected_athlete = st.sidebar.selectbox("Sélectionner un athlète", access)
-        # Récupérer les entraînements de l'athlète sélectionné
-        trainings = db_manager.get_all_trainings_for_skater(selected_athlete)
+        if selected_athlete:
+            # Récupérer les entraînements de l'athlète sélectionné
+            trainings = db_manager.get_all_trainings_for_skater(selected_athlete)
+        else:
+            st.error("Aucun athlète sélectionné.")
+            st.stop()
     else:
         # Récupérer les entraînements de l'utilisateur (athlète)
         trainings = db_manager.get_all_trainings_for_skater(access)
