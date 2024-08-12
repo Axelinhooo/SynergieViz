@@ -3,23 +3,30 @@ import pandas as pd
 from streamlit_echarts import st_echarts
 import plotly.graph_objects as go
 from datetime import datetime
+from features.dataImport import data_import
+from database.DatabaseManager import DatabaseManager
 
-def data_import():
-    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
-    if uploaded_file is not None:
-        data = pd.read_csv(uploaded_file)
-        st.write(data)
-        return data
 
 def create_histogram(data):
-    # Create the hstacked vertical bar chart using streamlit_echarts
-    # Compter le nombre de réussites et d'échecs par type de saut
-    jump_stats = data.groupby('type')['success'].value_counts().unstack(fill_value=0)
+    # Vérifier la présence des colonnes 'jump_type' et 'jump_success' (tableau incomplet)
+    if 'jump_type' not in data.columns or 'jump_success' not in data.columns:
+        st.error("Cet entraînement ne contient pas les informations nécessaires.")
+        return
+    
+    # Compter le nombre de réussites et d'échecs par type de saut (réussite : jump_success = 'true', échec : jump_success = 'false')
+    jump_stats = data.groupby(['jump_type', 'jump_success']).size().unstack(fill_value=0)
+
+    # Vérifier la présence des colonnes True et False
+    if True not in jump_stats.columns:
+        jump_stats[True] = 0
+    if False not in jump_stats.columns:
+        jump_stats[False] = 0
 
     # Préparer les données pour le graphique
-    x_axis = list(jump_stats.index)
-    success_data = jump_stats[1].tolist()
-    fail_data = jump_stats[0].tolist()
+    x_axis = jump_stats.index.tolist()
+    success_data = jump_stats[True].tolist()
+    fail_data = jump_stats[False].tolist()
+
 
     options = {
         "title": {"text": "Répartition des sauts par type"},
@@ -58,19 +65,19 @@ def create_histogram(data):
         
 def create_timeline(df):
     # Conversion des timestamps en objets datetime
-    df['videoTimestamp'] = df['videoTimeStamp'].apply(lambda x: datetime.strptime(x, '%M:%S'))
+    df['jump_time'] = df['jump_time'].apply(lambda x: datetime.strptime(x, '%M:%S'))
 
     # Création du graphique Plotly
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=df['videoTimestamp'],
-        y=df['rotations'],
+        x=df['jump_time'],
+        y=df['jump_rotations'],
         mode='markers',
         marker=dict(
-            color=df['success'].map({0: 'red', 1: 'green'}),
+            color=df['jump_success'].map({False: 'red', True: 'green'}),
             size=10
         ),
-        text=df.apply(lambda row: f"Patineur: {row['skater_name']}<br>Type de saut: {row['type']}<br>Réussi: {row['success']}<br>Rotations: {row['rotations']}<br>Timestamp: {row['videoTimeStamp']}", axis=1),
+        text=df.apply(lambda row: f"Type de saut: {row['jump_type']}<br>Réussi: {row['jump_success']}<br>Rotations: {row['jump_rotations']}<br>Timestamp: {row['jump_time']}", axis=1),
         hoverinfo='text'
     ))
 
@@ -86,7 +93,38 @@ def create_timeline(df):
     # Affichage du graphique dans Streamlit
     st.plotly_chart(fig)
 
-data = data_import()
-if data is not None:
-    create_histogram(data)
-    create_timeline(data)
+# Initialisation de la base de données
+db_manager = DatabaseManager()
+
+if st.session_state.logged_in:
+    # récupérer les access de l'utilisateur
+    access = st.session_state.user['access']
+    role = st.session_state.user['role']
+
+    if role == 'COACH':
+        # Afficher une liste déroulante pour sélectionner un athlète
+        selected_athlete = st.sidebar.selectbox("Sélectionner un athlète", access)
+        # Récupérer les entraînements de l'athlète sélectionné
+        trainings = db_manager.get_all_trainings_for_skater(selected_athlete)
+    else:
+        # Récupérer les entraînements de l'utilisateur (athlète)
+        trainings = db_manager.get_all_trainings_for_skater(access)
+
+    # Récupérer la date qui est en format secondes depuis 1970 et la convertir en format date
+    training_dates = [datetime.fromtimestamp(training.training_date) for training in trainings]
+    # Afficher la selectbox avec les dates des entraînements
+    selected_date = st.sidebar.selectbox("Date de l'entraînement", training_dates)
+    # Récupérer les données de l'entraînement sélectionné
+    selected_date_timestamp = int(selected_date.timestamp())
+    training_id = trainings[training_dates.index(selected_date)].training_id
+    training_data = db_manager.load_training_data(training_id)
+    # Faire de ces données un DataFrame
+    df = pd.DataFrame([jump.to_dict() for jump in training_data])
+    # Ajouter un filtre sur les rotations dans la sidebar
+    selected_rotations = st.sidebar.slider("Nombre de rotations", 0, 4, (0, 4))
+    df_hist = df[(df['jump_rotations'] >= selected_rotations[0]) & (df['jump_rotations'] <= selected_rotations[1])]
+    # Créer le graphique histogramme
+    create_histogram(df_hist)
+    # Créer le graphique timeline
+    create_timeline(df)
+    
