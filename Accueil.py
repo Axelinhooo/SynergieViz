@@ -48,6 +48,23 @@ if st.session_state.logged_in:
         st.session_state.logged_in = False
         st.session_state.user = None
         st.experimental_rerun()
+    if st.session_state.user['role'] == 'COACH':
+        if st.session_state.user['access']:
+            st.write(f"Vos athlètes : {st.session_state.user['access']}")
+        else:
+            st.write("Vous n'avez pas d'athlète attitrés. Faites-leur créer un compte !")
+    elif st.session_state.user['role'] == 'ATHLETE':
+        if st.session_state.user['coaches']:
+            st.write(f"Vos coachs : {st.session_state.user['coaches']}")
+        else:
+            st.write("Vous n'avez pas de coach attitré. Ajoutez en un !")
+
+        updated_coaches = st.multiselect("Ajouter ou supprimer un coach", db.get_all_coaches_name(), default=st.session_state.user['coaches'])
+        if st.button("Enregistrer"):
+            db.update_coaches(updated_coaches, st.session_state.user['name'])
+            st.session_state.user['coaches'] = updated_coaches
+            st.experimental_rerun()
+
 else:
     # Formulaire de sélection entre inscription et connexion
     mode = st.selectbox("Que souhaitez-vous faire ?", ["Inscription", "Connexion"])
@@ -66,8 +83,6 @@ else:
             all_coaches = db.get_all_coaches_name()
             # Multi-select pour choisir les coachs
             coaches = st.multiselect("Choisir les coachs", all_coaches)
-            for coach in coaches:
-                db.add_athlete_to_coach_access(coach, name)
             access = name
         else:
             access = ''
@@ -86,6 +101,8 @@ else:
             else:
                 # Créer un nouveau document dans la collection "users"
                 db.create_user(email, password, role, name, access, coaches)
+                for coach in coaches:
+                    db.add_athlete_to_coach_access(coach, name)
                 st.success("Compte enregistré avec succès !")
 
     elif mode == "Connexion":

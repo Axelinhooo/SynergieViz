@@ -164,6 +164,13 @@ class DatabaseManager:
         coach = self.db.collection("users").document(coach_id)
         coach.update({"access": firestore.ArrayUnion([athlete_name])})
 
+    def update_coaches(self, updated_coaches, athlete_name) -> None:
+        # Update the list of coaches for the athlete
+        athlete = self.db.collection("users").where("name", "==", athlete_name).get()
+        athlete_id = athlete[0].id
+        athlete = self.db.collection("users").document(athlete_id)
+        athlete.update({"coaches": updated_coaches})
+
     def get_all_trainings_for_skater(self, skater_name) -> List[TrainingData]:
         skater_id = self.get_skater_id_from_name(skater_name)
         #make it a string

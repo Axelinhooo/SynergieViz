@@ -3,7 +3,6 @@ import pandas as pd
 from streamlit_echarts import st_echarts
 import plotly.graph_objects as go
 from datetime import datetime
-from features.dataImport import data_import
 from database.DatabaseManager import DatabaseManager
 
 
