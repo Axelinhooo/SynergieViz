@@ -109,7 +109,7 @@ if st.session_state.logged_in:
         else:
             st.error("Aucun athlète sélectionné.")
             st.stop()
-    else:
+    elif role == 'ATHLETE':
         # Récupérer les entraînements de l'utilisateur (athlète)
         trainings = db_manager.get_all_trainings_for_skater(access)
 
@@ -130,4 +130,6 @@ if st.session_state.logged_in:
     create_histogram(df_hist)
     # Créer le graphique timeline
     create_timeline(df)
-    
+else:
+    st.error("Vous devez être connecté pour accéder à cette page.")
+    st.stop()
