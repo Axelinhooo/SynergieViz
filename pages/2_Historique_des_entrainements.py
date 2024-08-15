@@ -3,6 +3,7 @@ import pandas as pd
 from database.DatabaseManager import DatabaseManager
 from datetime import datetime
 
+db_manager = DatabaseManager()
 
 def color_background(val):
     if val == "":
@@ -43,14 +44,12 @@ if st.session_state.logged_in:
     if role == 'COACH':
         selected_athlete = st.sidebar.selectbox("Sélectionner un athlète", access)
         if selected_athlete:
-            db_manager = DatabaseManager()
             trainings = db_manager.get_all_trainings_for_skater(selected_athlete)
         else:
             st.error("Aucun athlète sélectionné.")
             st.stop()
 
     elif role == 'ATHLETE':
-        db_manager = DatabaseManager()
         trainings = db_manager.get_all_trainings_for_skater(access)
 
     training_dates = [datetime.fromtimestamp(training.training_date) for training in trainings]
