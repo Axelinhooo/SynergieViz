@@ -108,13 +108,13 @@ if st.session_state.logged_in:
         skater_index = 0
 
     trainings = st.session_state.trainings[skater_index]
-    for date in trainings["training_date"]:
-        date = datetime.fromtimestamp(date)
-    training_dates = [datetime.fromtimestamp(date) for date in trainings["training_date"]]
+    # convert the timestamps in the training_date column to datetime objects
+    trainings["training_date"] = pd.to_datetime(trainings["training_date"], unit="s")
+    training_dates = trainings["training_date"].tolist()
     # Selectbox to choose the date of the training
     selected_date = st.sidebar.selectbox("Select a training", training_dates)
     # Get the training_id of the selected training
-    selected_training = trainings[trainings["training_date"] == selected_date.timestamp()]
+    selected_training = trainings[trainings["training_date"] == selected_date]
     selected_training_id = selected_training["training_id"].values[0]
     
     # Create a DataFrame for the jumps of the selected training with data inside (from st.session_state.jumps) to create the histogram and the timeline
