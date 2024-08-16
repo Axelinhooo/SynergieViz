@@ -3,8 +3,6 @@ import pandas as pd
 from streamlit_echarts import st_echarts
 import plotly.graph_objects as go
 from datetime import datetime
-from database.DatabaseManager import DatabaseManager
-
 
 def create_histogram(data):
     # Vérifier la présence des colonnes 'jump_type' et 'jump_success' (tableau incomplet)
@@ -92,44 +90,45 @@ def create_timeline(df):
     # Affichage du graphique dans Streamlit
     st.plotly_chart(fig)
 
-# Initialisation de la base de données
-db_manager = DatabaseManager()
 
 if st.session_state.logged_in:
-    # récupérer les access de l'utilisateur
-    access = st.session_state.user['access']
-    role = st.session_state.user['role']
-
-    if role == 'COACH':
-        # Afficher une liste déroulante pour sélectionner un athlète
-        selected_athlete = st.sidebar.selectbox("Sélectionner un athlète", access)
-        if selected_athlete:
-            # Récupérer les entraînements de l'athlète sélectionné
-            trainings = db_manager.get_all_trainings_for_skater(selected_athlete)
+    if st.session_state.user['role'] == 'COACH':
+        # Create the Streamlit selectbox
+        selected_skater = st.sidebar.selectbox("Select a skater", st.session_state.skater_names)
+        if selected_skater:
+            # Find the corresponding skater ID based on the selected name
+            selected_skater_id = st.session_state.skater_ids[st.session_state.skater_names.index(selected_skater)]
         else:
             st.error("Aucun athlète sélectionné.")
             st.stop()
-    elif role == 'ATHLETE':
-        # Récupérer les entraînements de l'utilisateur (athlète)
-        trainings = db_manager.get_all_trainings_for_skater(access)
+        
+        skater_index = st.session_state.skater_ids.index(selected_skater_id)
+        
+    elif st.session_state.user['role'] == 'ATHLETE':
+        skater_index = 0
 
-    # Récupérer la date qui est en format secondes depuis 1970 et la convertir en format date
-    training_dates = [datetime.fromtimestamp(training.training_date) for training in trainings]
-    # Afficher la selectbox avec les dates des entraînements
-    selected_date = st.sidebar.selectbox("Date de l'entraînement", training_dates)
-    # Récupérer les données de l'entraînement sélectionné
-    selected_date_timestamp = int(selected_date.timestamp())
-    training_id = trainings[training_dates.index(selected_date)].training_id
-    training_data = db_manager.load_training_data(training_id)
-    # Faire de ces données un DataFrame
-    df = pd.DataFrame([jump.to_dict() for jump in training_data])
-    # Ajouter un filtre sur les rotations dans la sidebar
-    selected_rotations = st.sidebar.slider("Nombre de rotations", 0, 4, (0, 4))
-    df_hist = df[(df['jump_rotations'] >= selected_rotations[0]) & (df['jump_rotations'] <= selected_rotations[1])]
-    # Créer le graphique histogramme
-    create_histogram(df_hist)
-    # Créer le graphique timeline
-    create_timeline(df)
+    trainings = st.session_state.trainings[skater_index]
+    for date in trainings["training_date"]:
+        date = datetime.fromtimestamp(date)
+    training_dates = [datetime.fromtimestamp(date) for date in trainings["training_date"]]
+    # Selectbox to choose the date of the training
+    selected_date = st.sidebar.selectbox("Select a training", training_dates)
+    # Get the training_id of the selected training
+    selected_training = trainings[trainings["training_date"] == selected_date.timestamp()]
+    selected_training_id = selected_training["training_id"].values[0]
+    
+    # Create a DataFrame for the jumps of the selected training with data inside (from st.session_state.jumps) to create the histogram and the timeline
+    jumps = st.session_state.jumps[skater_index]
+    selected_jumps = jumps[jumps["training_id"] == selected_training_id]
+    create_histogram(selected_jumps)
+    create_timeline(selected_jumps)
+
+    
+
+        
+
+
+    
 else:
     st.error("Vous devez être connecté pour accéder à cette page.")
     st.stop()
