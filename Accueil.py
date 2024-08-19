@@ -89,6 +89,10 @@ if st.session_state.logged_in:
     if st.button("Se déconnecter"):
         st.session_state.logged_in = False
         st.session_state.user = None
+        st.session_state.trainings = None
+        st.session_state.jumps = None
+        st.session_state.skater_names = None
+        st.session_state.skater_ids = None
         st.experimental_rerun()
     if st.session_state.user['role'] == 'COACH':
         if st.session_state.user['access']:
@@ -118,6 +122,8 @@ if st.session_state.logged_in:
         updated_coaches = st.multiselect("Ajouter ou supprimer un coach", db.get_all_coaches_name(), default=st.session_state.user['coaches'])
         if st.button("Enregistrer"):
             db.update_coaches(updated_coaches, st.session_state.user['name'])
+            for coach in updated_coaches:
+                db.add_athlete_to_coach_access(coach, st.session_state.user['name'])
             st.session_state.user['coaches'] = updated_coaches
             st.experimental_rerun()
 
