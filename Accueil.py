@@ -63,7 +63,9 @@ def load_data(skater_id):
     
     # Créer un dataframe pour les jumps
     jump_df = pd.DataFrame(jump_data)
-    
+    jump_df['skater_name'] = jump_df['training_id'].apply(db.get_skater_name_from_training_id)
+    jump_df['training_date'] = jump_df['training_id'].apply(db.get_training_date_from_training_id)
+
     return training_df, jump_df
 
 
@@ -112,8 +114,10 @@ if st.session_state.logged_in:
             st.write("Vous n'avez pas d'athlète attitrés. Faites-leur créer un compte !")
     elif st.session_state.user['role'] == 'ATHLETE':
         training_df, jump_df = load_data(st.session_state.user['access'])
+
         st.session_state.trainings = [training_df]
         st.session_state.jumps = [jump_df]
+
         if st.session_state.user['coaches']:
             st.write(f"Vos coachs : {st.session_state.user['coaches']}")
         else:

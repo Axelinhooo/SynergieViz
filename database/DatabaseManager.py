@@ -86,12 +86,12 @@ class DatabaseManager:
             data_jumps.append(JumpData(jump.id, jump.get("training_id"), jump.get("jump_type"), jump.get("jump_rotations"), jump.get("jump_success"), jump.get("jump_time")))
         return data_jumps
     
-    def get_skater_from_training(self, training_id : int) -> int:
+    def get_skater_from_training(self, training_id : str) -> int:
         skater_id = self.db.collection("trainings").document(training_id).get().get("skater_id")
-        return int(skater_id)
+        return str(skater_id)
 
     def get_skater_name_from_id(self, skater_id : str) -> str:
-        skater_name = self.db.collection("skaters").document(skater_id).get().get("skater_name")
+        skater_name = self.db.collection("users").document(skater_id).get().get("name")
         return skater_name
 
     def get_skater_id_from_name(self, skater_name : str) -> str:
@@ -229,3 +229,12 @@ class DatabaseManager:
     
     def update_training_skater_id(self, training_id, skater_id) -> None:
         self.db.collection("trainings").document(training_id).update({"skater_id" : skater_id})
+
+    def get_skater_name_from_training_id(self, training_id) -> str:
+        skater_id = self.get_skater_from_training(training_id)
+        skater_name = self.get_skater_name_from_id(skater_id)
+        return skater_name
+    
+    def get_training_date_from_training_id(self, training_id) -> datetime:
+        training_date = self.db.collection("trainings").document(training_id).get().get("training_date")
+        return training_date
