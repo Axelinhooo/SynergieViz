@@ -21,7 +21,7 @@ def color_background(val):
 def create_recap_frame(data):
     # Création du DataFrame récapitulatif : une colonne par type de saut, une ligne par nombre de rotations (1, 2, 3 et 4). Dans les cases, le pourcentage de réussite d'un tel saut (type + rotations)
     recap = pd.DataFrame(index=[1, 2, 3, 4], columns=data['jump_type'].unique())
-    # arrondir les jump_rotations à l'entier inférieur (pour les jump_type == AXEL)
+    # Arrondir les jump_rotations à l'entier inférieur (pour les jump_type == AXEL)
     data['jump_rotations'] = data.apply(lambda row: 
                                    math.floor(row['jump_rotations']) 
                                    if row['jump_type'] == 'AXEL' and str(row['jump_rotations']).endswith('.5') 
@@ -44,27 +44,19 @@ def create_recap_frame(data):
 
 if st.session_state.logged_in:
     if st.session_state.user['role'] == 'COACH':
-        # Create the Streamlit selectbox
-        selected_skater = st.sidebar.selectbox("Select a skater", st.session_state.skater_names)
-        if selected_skater:
-            # Find the corresponding skater ID based on the selected name
-            selected_skater_id = st.session_state.skater_ids[st.session_state.skater_names.index(selected_skater)]
-        else:
+        selected_skater = st.sidebar.selectbox("Sélectionner un athlète", st.session_state.skater_names)
+        if not selected_skater:
             st.error("Aucun athlète sélectionné.")
             st.stop()
         
-        skater_index = st.session_state.skater_ids.index(selected_skater_id)
-        
     elif st.session_state.user['role'] == 'ATHLETE':
-        skater_index = 0
+        selected_skater = st.session_state.user['name']
     
-    trainings = st.session_state.trainings[skater_index]
-    trainings["training_date"] = pd.to_datetime(trainings["training_date"], unit="s")
-
-    jumps = st.session_state.jumps[skater_index]
+    for i in st.session_state.jumps:
+        if selected_skater == i["skater_name"][0]:
+            jumps = i
+            break
     create_recap_frame(jumps)
-
-
 
 else:
     st.error("Vous devez être connecté pour accéder à cette page.")
