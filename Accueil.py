@@ -95,7 +95,7 @@ if st.session_state.logged_in:
         st.session_state.jumps = None
         st.session_state.skater_names = None
         st.session_state.skater_ids = None
-        st.experimental_rerun()
+        st.rerun()
     if st.session_state.user['role'] == 'COACH':
         if st.session_state.user['access']:
             all_training_data = []
