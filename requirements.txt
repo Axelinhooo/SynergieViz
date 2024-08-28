@@ -1,7 +1,6 @@
 absl-py==2.1.0
 annotated-types==0.7.0
 anyio==4.4.0
-apturl==0.5.2
 asttokens==2.4.1
 astunparse==1.6.3
 attrs==24.2.0
