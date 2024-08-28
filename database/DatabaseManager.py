@@ -55,7 +55,18 @@ class SkaterData:
 
 class DatabaseManager:
     def __init__(self):
-        cred = credentials.Certificate('s2m-skating-firebase-adminsdk-3ofmb-59e6c86f3e.json')
+        cred = credentials.Certificate({
+            "type": st.secrets["default"]["type"],
+            "project_id": st.secrets["default"]["project_id"],
+            "private_key_id": st.secrets["default"]["private_key_id"],
+            "private_key": st.secrets["default"]["private_key"],
+            "client_email": st.secrets["default"]["client_email"],
+            "client_id": st.secrets["default"]["client_id"],
+            "auth_uri": st.secrets["default"]["auth_uri"],
+            "token_uri": st.secrets["default"]["token_uri"],
+            "auth_provider_x509_cert_url": st.secrets["default"]["auth_provider_x509_cert_url"],
+            "client_x509_cert_url": st.secrets["default"]["client_x509_cert_url"],
+        })
         try:
             firebase_admin.get_app()
         except ValueError:
