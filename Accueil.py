@@ -130,6 +130,8 @@ if st.session_state.logged_in:
                 db.add_athlete_to_coach_access(coach, st.session_state.user['name'])
             st.session_state.user['coaches'] = updated_coaches
             st.rerun()
+        
+        st.session_state.jumps[0]
 
 else:
     # Formulaire de sélection entre inscription et connexion
@@ -185,6 +187,8 @@ else:
                 st.session_state.logged_in = True
                 st.session_state.user = user
                 st.success("Connexion réussie !")
+                # clear le cache pour recharger les données
+                st.cache_data.clear()
                 st.rerun()
             else:
                 st.error("Email ou mot de passe incorrect.")
