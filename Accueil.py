@@ -11,7 +11,7 @@ st.set_page_config(
     page_icon=":lock:",
 )
 
-st.title("Welcome to SynergieViz")
+st.title("Bienvenue sur SynergieViz")
 
 # Initialisation de Firebase Admin
 db = DatabaseManager()
@@ -88,14 +88,6 @@ if 'skater_ids' not in st.session_state:
 if st.session_state.logged_in:
     st.title("Profil")
     st.write(f"Bienvenue {st.session_state.user['name']} !")
-    if st.button("Se déconnecter"):
-        st.session_state.logged_in = False
-        st.session_state.user = None
-        st.session_state.trainings = None
-        st.session_state.jumps = None
-        st.session_state.skater_names = None
-        st.session_state.skater_ids = None
-        st.rerun()
     if st.session_state.user['role'] == 'COACH':
         if st.session_state.user['access']:
             all_training_data = []
@@ -130,8 +122,14 @@ if st.session_state.logged_in:
                 db.add_athlete_to_coach_access(coach, st.session_state.user['name'])
             st.session_state.user['coaches'] = updated_coaches
             st.rerun()
-        
-        st.session_state.jumps[0]
+    if st.button("Se déconnecter"):
+        st.session_state.logged_in = False
+        st.session_state.user = None
+        st.session_state.trainings = None
+        st.session_state.jumps = None
+        st.session_state.skater_names = None
+        st.session_state.skater_ids = None
+        st.rerun()
 
 else:
     # Formulaire de sélection entre inscription et connexion

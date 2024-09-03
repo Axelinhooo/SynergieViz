@@ -94,7 +94,7 @@ def create_timeline(df):
 if st.session_state.logged_in:
     if st.session_state.user['role'] == 'COACH':
         # Create the Streamlit selectbox
-        selected_skater = st.sidebar.selectbox("Select a skater", st.session_state.skater_names)
+        selected_skater = st.sidebar.selectbox("Selectionnez un athlète", st.session_state.skater_names)
         if not selected_skater:
             st.error("Aucun athlète sélectionné.")
             st.stop()
@@ -111,7 +111,7 @@ if st.session_state.logged_in:
 
     training_dates = jumps["training_date"].unique().tolist()
     # Selectbox to choose the date of the training
-    selected_date = st.sidebar.selectbox("Select a training", training_dates)
+    selected_date = st.sidebar.selectbox("Selectionnez un entraînement", training_dates)
     selected_jumps = jumps[jumps["training_date"] == selected_date]
     create_histogram(selected_jumps)
     create_timeline(selected_jumps)

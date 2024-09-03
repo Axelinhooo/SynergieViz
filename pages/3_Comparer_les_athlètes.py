@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import math
 from streamlit_echarts import st_echarts
 from datetime import datetime
 from database.DatabaseManager import DatabaseManager 
@@ -13,11 +14,11 @@ def create_radar(filtered_datasets):
         },
         "radar": {
             "indicator": [
-                {"name": "Total jumps", "max": 50, "axisLabel": {"show": True}},
-                {"name": "Success rate (%)", "max": 100, "min": 50, "axisLabel": {"show": True}},
-                {"name": "Average angular velocity (turns/s)", "max": 4, "axisLabel": {"show": True}},
-                {"name": "Average flight time (s)", "max": 2, "min": 0, "axisLabel": {"show": True}},
-                {"name": "Jumps/hr", "max": 50, "axisLabel": {"show": True}},
+                {"name": "Total de sauts", "max": 50, "axisLabel": {"show": True}},
+                {"name": "Taux de réussite (%)", "max": 100, "min": 0, "axisLabel": {"show": True}},
+                {"name": "Vitesse angulaire max (tours/s)", "max": 6, "axisLabel": {"show": True}},
+                {"name": "Durée de saut(s)", "max": 2, "min": 0, "axisLabel": {"show": True}},
+                {"name": "Sauts par entraînement", "max": 50, "min": 0, "axisLabel": {"show": True}},
             ]
         },
         "series": []
@@ -33,9 +34,9 @@ def create_radar(filtered_datasets):
                     "value": [
                         int(data.shape[0]),
                         round(float(data['jump_success'].mean()),1)*100,
-                        3.2,
-                        0.5,
-                        42,
+                        round(float(data['jump_max_speed'].mean()),1),
+                        round(float(data['jump_length'].mean()),1),
+                        int(data.shape[0])/int(data['training_id'].nunique())
                     ],
                     "name": str(data['skater_name'].unique()[0]),
                 }]
@@ -58,6 +59,18 @@ if st.session_state.logged_in:
     jump_types = list(set(jump_types))
     selected_jump_type = st.sidebar.selectbox("Sélectionner un type de saut", jump_types)
 
+    # Add an angular_velocity column
+    for jump in jumps:
+        jump['angular_velocity'] = jump['jump_rotations'] / jump['jump_length']
+        
+
+    for jump in jumps:
+        jump['jump_rotations'] = jump.apply(lambda row: 
+                                    math.floor(row['jump_rotations']) 
+                                    if row['jump_type'] == 'AXEL' and str(row['jump_rotations']).endswith('.5') 
+                                    else row['jump_rotations'], 
+                                    axis=1)
+
     # Add a jump_rotations filter
     jump_rotations = []
     for jump in jumps:
@@ -72,3 +85,7 @@ if st.session_state.logged_in:
         filtered_datasets.append(filtered_jump)
        
     create_radar(filtered_datasets)
+
+else:
+    st.error("Vous devez être connecté pour accéder à cette page.")
+    st.stop()
