@@ -66,17 +66,33 @@ def create_timeline(df):
 
     # Création du graphique Plotly
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=df['jump_time'],
-        y=df['jump_rotations'],
-        mode='markers',
-        marker=dict(
-            color=df['jump_success'].map({False: 'red', True: 'green'}),
-            size=10
-        ),
-        text=df.apply(lambda row: f"Type de saut: {row['jump_type']}<br>Réussi: {row['jump_success']}<br>Rotations: {row['jump_rotations']}<br>Timestamp: {row['jump_time']}", axis=1),
-        hoverinfo='text'
-    ))
+
+    # Dictionnaire pour les couleurs des sauts
+    colors = {
+        'TOE_LOOP': '#1b9e77',
+        'SALCHOW': '#d95f02',
+        'LOOP': '#7570b3',
+        'FLIP': '#e7298a',
+        'LUTZ': '#66a61e',
+        'AXEL': '#e6ab02'
+    }
+
+    for jump_type, color in colors.items():
+        filtered_df = df[df['jump_type'] == jump_type]
+        fig.add_trace(go.Scatter(
+            x=filtered_df['jump_time'],
+            y=filtered_df['jump_rotations'],
+            mode='markers',
+            marker=dict(
+                color=color,
+                symbol=filtered_df['jump_success'].map({False: 'x', True: 'circle'}),
+                size=10
+            ),
+            text=filtered_df.apply(lambda row: f"Type de saut: {row['jump_type']}<br>Réussi: {row['jump_success']}<br>Rotations: {row['jump_rotations']}<br>Timestamp: {row['jump_time']}", axis=1),
+            hoverinfo='text',
+            name=jump_type,  # Nom de la trace pour la légende
+            showlegend=True
+        ))
 
     # Conversion de l'axe des abscisses en format de temps
     fig.update_xaxes(tickformat="%M:%S")
@@ -89,6 +105,7 @@ def create_timeline(df):
 
     # Affichage du graphique dans Streamlit
     st.plotly_chart(fig)
+
 
 
 if st.session_state.logged_in:
