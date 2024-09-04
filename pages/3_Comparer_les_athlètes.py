@@ -36,7 +36,7 @@ def create_radar(filtered_datasets):
                         round(float(data['jump_success'].mean()),1)*100,
                         round(float(data['jump_max_speed'].mean()),1),
                         round(float(data['jump_length'].mean()),1),
-                        int(data.shape[0])/int(data['training_id'].nunique())
+                        int(data.shape[0])/int(data['training_date'].nunique())
                     ],
                     "name": str(data['skater_name'].unique()[0]),
                 }]

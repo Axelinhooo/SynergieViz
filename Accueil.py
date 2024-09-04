@@ -47,20 +47,18 @@ def load_data(skater_id):
 
     # Charger les jumps liés à ces trainings
     skatername = db.get_skater_name_from_training_id(trainings[0].training_id)
-    jumps_df = pd.DataFrame()
+    all_jumps_df = pd.DataFrame()
 
     for training in trainings:
         jump_df = pd.DataFrame(training.training_jumps)
         jump_df["training_date"] = [training.training_date]*len(jump_df)
         jump_df["skater_name"] = [skatername]*len(jump_df)
-        if jumps_df.empty:
-            jumps_df = jump_df
+        if all_jumps_df.empty:
+            all_jumps_df = jump_df
         else:
-            jumps_df = pd.concat([jumps_df,jump_df], ignore_index=True)
+            all_jumps_df = pd.concat([all_jumps_df,jump_df], ignore_index=True)
 
-    jumps_df
-
-    return training_df, jump_df
+    return training_df, all_jumps_df
 
 
 # Initialiser les variables de session
@@ -100,7 +98,6 @@ if st.session_state.logged_in:
             st.write("Vous n'avez pas d'athlète attitrés. Faites-leur créer un compte !")
     elif st.session_state.user['role'] == 'ATHLETE':
         training_df, jump_df = load_data(st.session_state.user['access'])
-
         st.session_state.trainings = [training_df]
         st.session_state.jumps = [jump_df]
 
