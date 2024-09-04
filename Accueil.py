@@ -44,27 +44,21 @@ def load_data(skater_id):
     
     # Créer un dataframe pour les trainings
     training_df = pd.DataFrame([vars(t) for t in trainings])
-    
+
     # Charger les jumps liés à ces trainings
-    jump_data = []
+    skatername = db.get_skater_name_from_training_id(trainings[0].training_id)
+    jumps_df = pd.DataFrame()
+
     for training in trainings:
-        jump_ids = training.training_jumps
-        for jump_id in jump_ids:
-            jump = db.get_jump_by_id(jump_id)
-            jump_data.append({
-                "jump_length": jump.jump_length,
-                "jump_max_speed": jump.jump_max_speed,
-                "jump_rotations": jump.jump_rotations,
-                "jump_success": jump.jump_success,
-                "jump_time": jump.jump_time,
-                "jump_type": jump.jump_type,
-                "training_id": jump.training_id
-            })
-    
-    # Créer un dataframe pour les jumps
-    jump_df = pd.DataFrame(jump_data)
-    jump_df['skater_name'] = jump_df['training_id'].apply(db.get_skater_name_from_training_id)
-    jump_df['training_date'] = jump_df['training_id'].apply(db.get_training_date_from_training_id)
+        jump_df = pd.DataFrame(training.training_jumps)
+        jump_df["training_date"] = [training.training_date]*len(jump_df)
+        jump_df["skater_name"] = [skatername]*len(jump_df)
+        if jumps_df.empty:
+            jumps_df = jump_df
+        else:
+            jumps_df = pd.concat([jumps_df,jump_df], ignore_index=True)
+
+    jumps_df
 
     return training_df, jump_df
 
