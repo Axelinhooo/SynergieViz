@@ -10,6 +10,8 @@ from database.DatabaseManager import DatabaseManager
 
 
 def create_radar(filtered_datasets):
+    # number_of_jumps in filtered_datasets + 10%
+    max_jumps = round(max([data.shape[0] for data in filtered_datasets]) * 1.1)
     option = {
         "legend": {"data": []},
         "tooltip": {
@@ -17,7 +19,10 @@ def create_radar(filtered_datasets):
         },
         "radar": {
             "indicator": [
-                {"name": "Total de sauts", "max": 50, "axisLabel": {"show": True}},
+                {   
+                    "name": "Total de sauts", 
+                    "max": max_jumps, 
+                    "axisLabel": {"show": True}},
                 {
                     "name": "Taux de réussite (%)",
                     "max": 100,
@@ -31,7 +36,7 @@ def create_radar(filtered_datasets):
                 },
                 {
                     "name": "Durée de saut(s)",
-                    "max": 2,
+                    "max": 1,
                     "min": 0,
                     "axisLabel": {"show": True},
                 },
@@ -59,9 +64,9 @@ def create_radar(filtered_datasets):
                                 int(data.shape[0]),
                                 round(float(data["jump_success"].mean()), 1) * 100,
                                 round(float(data["jump_max_speed"].mean()), 1),
-                                round(float(data["jump_length"].mean()), 1),
-                                int(data.shape[0])
-                                / int(data["training_date"].nunique()),
+                                round(float(data["jump_length"].mean()), 2),
+                                round(int(data.shape[0])
+                                / int(data["training_date"].nunique()), 1),
                             ],
                             "name": str(data["skater_name"].unique()[0]),
                         }
@@ -80,7 +85,7 @@ def create_line_chart(filtered_datasets):
     line_data = []
     for data in filtered_datasets:
         if data.shape[0] > 0:
-            data["month"] = data["traineing_date"].dt.to_period("M").astype(str)
+            data["month"] = data["training_date"].dt.to_period("M").astype(str)
             monthly_success_rate = (
                 data.groupby("month")["jump_success"].mean().reset_index()
             )
