@@ -10,8 +10,17 @@ from database.DatabaseManager import DatabaseManager
 
 
 def create_radar(filtered_datasets):
-    # number_of_jumps in filtered_datasets + 10%
-    max_jumps = round(max([data.shape[0] for data in filtered_datasets]) * 1.1)
+    # Définir le nombre maximal de sauts pour l'axe radar
+    max_jumps = max([data.shape[0] for data in filtered_datasets]) + 1
+    # arrondir au nombre divisible par 5 supérieur
+    for i in range(1, 6):
+        if max_jumps % 5 == 0:
+            break
+        max_jumps += 1
+    
+    # Définir une liste de couleurs fixes
+    colors = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#8c564b', '#64e572', '#fd8664', '#8a9899', '#e4c2d5']
+    
     option = {
         "legend": {"data": []},
         "tooltip": {
@@ -19,45 +28,26 @@ def create_radar(filtered_datasets):
         },
         "radar": {
             "indicator": [
-                {   
-                    "name": "Total de sauts", 
-                    "max": max_jumps, 
-                    "axisLabel": {"show": True}},
-                {
-                    "name": "Taux de réussite (%)",
-                    "max": 100,
-                    "min": 0,
-                    "axisLabel": {"show": True},
-                },
-                {
-                    "name": "Vitesse angulaire max (tours/s)",
-                    "max": 6,
-                    "axisLabel": {"show": True},
-                },
-                {
-                    "name": "Durée de saut(s)",
-                    "max": 1,
-                    "min": 0,
-                    "axisLabel": {"show": True},
-                },
-                {
-                    "name": "Sauts par entraînement",
-                    "max": 50,
-                    "min": 0,
-                    "axisLabel": {"show": True},
-                },
+                {"name": "Total de sauts", "max": max_jumps, "axisLabel": {"show": True}},
+                {"name": "Taux de réussite (%)", "max": 100, "min": 0, "axisLabel": {"show": True}},
+                {"name": "Vitesse angulaire max (tours/s)", "max": 6, "axisLabel": {"show": True}},
+                {"name": "Durée de saut(s)", "max": 1, "min": 0, "axisLabel": {"show": True}},
+                {"name": "Sauts par entraînement", "max": 50, "min": 0, "axisLabel": {"show": True}},
             ]
         },
         "series": [],
     }
 
-    for data in filtered_datasets:
+    for index, data in enumerate(filtered_datasets):
         if data.shape[0] > 0:
-            option["legend"]["data"].append(str(data["skater_name"].unique()[0]))
+            athlete_name = str(data["skater_name"].unique()[0])
+            option["legend"]["data"].append(athlete_name)
             option["series"].append(
                 {
-                    "name": str(data["skater_name"].unique()[0]),
+                    "name": athlete_name,
                     "type": "radar",
+                    "itemStyle": {"color": colors[index % len(colors)]},  # Attribuer une couleur fixe
+                    "lineStyle": {"color": colors[index % len(colors)]},  # Assurer que la ligne a la même couleur
                     "data": [
                         {
                             "value": [
@@ -65,10 +55,9 @@ def create_radar(filtered_datasets):
                                 round(float(data["jump_success"].mean()), 1) * 100,
                                 round(float(data["jump_max_speed"].mean()), 1),
                                 round(float(data["jump_length"].mean()), 2),
-                                round(int(data.shape[0])
-                                / int(data["training_date"].nunique()), 1),
+                                round(int(data.shape[0]) / int(data["training_date"].nunique()), 1),
                             ],
-                            "name": str(data["skater_name"].unique()[0]),
+                            "name": athlete_name,
                         }
                     ],
                 }
