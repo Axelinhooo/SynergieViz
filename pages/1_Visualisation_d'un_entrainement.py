@@ -63,7 +63,7 @@ def create_histogram(data):
 
 
 def create_timeline(df):
-    st.markdown("### Timeline de l'entraînement")
+    st.markdown("### Sauts pendant l'entraînement")
     # Conversion des timestamps en objets datetime
     df["jump_time"] = df["jump_time"].apply(lambda x: datetime.strptime(x, "%M:%S"))
 
