@@ -135,7 +135,7 @@ if st.session_state.logged_in:
 
 else:
     # Formulaire de sélection entre inscription et connexion
-    mode = st.selectbox("Que souhaitez-vous faire ?", ["Inscription", "Connexion"])
+    mode = st.selectbox("Que souhaitez-vous faire ?", ["Connexion", "Inscription"])
 
     if mode == "Inscription":
         # Formulaire d'inscription
