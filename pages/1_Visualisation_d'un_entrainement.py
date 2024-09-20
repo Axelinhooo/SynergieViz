@@ -95,7 +95,7 @@ def create_timeline(df):
                     size=10,
                 ),
                 text=filtered_df.apply(
-                    lambda row: f"Type de saut: {row['jump_type']}<br>Réussi: {row['jump_success']}<br>Rotations: {row['jump_rotations']}<br>Timestamp: {row['jump_time']}",
+                    lambda row: f"Type de saut: {row['jump_type']}<br>Réussi: {row['jump_success']}<br>Rotations: {row['jump_rotations']}<br>Temps: {row['jump_time']}",
                     axis=1,
                 ),
                 hoverinfo="text",
@@ -108,7 +108,7 @@ def create_timeline(df):
     fig.update_xaxes(tickformat="%M:%S")
 
     fig.update_layout(
-        xaxis_title="Timestamp (min:sec)",
+        xaxis_title="Temps (min:sec)",
         yaxis_title="Rotations",
         title="Timeline de l'entrainement",
     )
@@ -125,7 +125,7 @@ def create_frame(df):
             "jump_rotations": "Rotations",
             "jump_length": "Durée du saut",
             "jump_success": "Succès",
-            "jump_time": "Timestamp",
+            "jump_time": "Temps",
             "jump_max_speed": "Vitesse angulaire maximale",
         }
     )
@@ -136,14 +136,14 @@ def create_frame(df):
             "Rotations",
             "Durée du saut",
             "Succès",
-            "Timestamp",
+            "Temps",
             "Vitesse angulaire maximale",
         ]
     ]
     #enlever la colonne index
     df_framed.reset_index(drop=True, inplace=True)
     # La colonne timestamp affiche un timestamp "1970-01-01 00:05:15" au lieu de "05:15" par exemple, on va donc la formater
-    df_framed["Timestamp"] = df_framed["Timestamp"].apply(lambda x: x.strftime("%M:%S"))
+    df_framed["Temps"] = df_framed["Temps"].apply(lambda x: x.strftime("%M:%S"))
     st.write(df_framed)
 
 
