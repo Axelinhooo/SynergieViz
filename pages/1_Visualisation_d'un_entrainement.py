@@ -6,6 +6,7 @@ from streamlit_echarts import st_echarts
 
 
 def create_histogram(data):
+    st.markdown("### Répartition des sauts par type")
     # Vérifier la présence des colonnes 'jump_type' et 'jump_success' (tableau incomplet)
     if "jump_type" not in data.columns or "jump_success" not in data.columns:
         st.error("Cet entraînement ne contient pas les informations nécessaires.")
@@ -28,7 +29,6 @@ def create_histogram(data):
     fail_data = jump_stats[False].tolist()
 
     options = {
-        "title": {"text": "Répartition des sauts par type"},
         "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
         "grid": {"left": "3%", "right": "4%", "bottom": "3%", "containLabel": True},
         "xAxis": {"type": "category", "data": x_axis},
@@ -63,6 +63,7 @@ def create_histogram(data):
 
 
 def create_timeline(df):
+    st.markdown("### Timeline de l'entraînement")
     # Conversion des timestamps en objets datetime
     df["jump_time"] = df["jump_time"].apply(lambda x: datetime.strptime(x, "%M:%S"))
 
@@ -110,7 +111,6 @@ def create_timeline(df):
     fig.update_layout(
         xaxis_title="Temps (min:sec)",
         yaxis_title="Rotations",
-        title="Timeline de l'entrainement",
     )
 
     # Affichage du graphique dans Streamlit
@@ -118,6 +118,7 @@ def create_timeline(df):
 
 
 def create_frame(df):
+    st.markdown("### Détails des sauts")
     # Print a DataFrame but replace the column names with the French translation
     df_framed = df.rename(
         columns={
