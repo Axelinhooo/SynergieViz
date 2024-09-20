@@ -66,6 +66,7 @@ def create_timeline(df):
     # Conversion des timestamps en objets datetime
     df["jump_time"] = df["jump_time"].apply(lambda x: datetime.strptime(x, "%M:%S"))
 
+
     # Création du graphique Plotly
     fig = go.Figure()
 
@@ -116,6 +117,36 @@ def create_timeline(df):
     st.plotly_chart(fig)
 
 
+def create_frame(df):
+    # Print a DataFrame but replace the column names with the French translation
+    df_framed = df.rename(
+        columns={
+            "jump_type": "Type de saut",
+            "jump_rotations": "Rotations",
+            "jump_length": "Durée du saut",
+            "jump_success": "Succès",
+            "jump_time": "Timestamp",
+            "jump_max_speed": "Vitesse angulaire maximale",
+        }
+    )
+    # Ne garder que les colonnes ci dessus
+    df_framed = df_framed[
+        [
+            "Type de saut",
+            "Rotations",
+            "Durée du saut",
+            "Succès",
+            "Timestamp",
+            "Vitesse angulaire maximale",
+        ]
+    ]
+    #enlever la colonne index
+    df_framed.reset_index(drop=True, inplace=True)
+    # La colonne timestamp affiche un timestamp "1970-01-01 00:05:15" au lieu de "05:15" par exemple, on va donc la formater
+    df_framed["Timestamp"] = df_framed["Timestamp"].apply(lambda x: x.strftime("%M:%S"))
+    st.write(df_framed)
+
+
 if "logged_in" in st.session_state:
     if st.session_state.logged_in:
         if st.session_state.user["role"] == "COACH":
@@ -145,6 +176,7 @@ if "logged_in" in st.session_state:
         selected_jumps = jumps[jumps["training_date"] == selected_date]
         create_histogram(selected_jumps)
         create_timeline(selected_jumps)
+        create_frame(selected_jumps)
     else:
         st.error("Vous devez être connecté pour accéder à cette page.")
         st.stop()
