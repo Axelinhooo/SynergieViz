@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 from streamlit_echarts import st_echarts
+import math
 
 
 def create_histogram(data):
@@ -150,6 +151,17 @@ def create_frame(df):
 
 if "logged_in" in st.session_state:
     if st.session_state.logged_in:
+        jumps = st.session_state.jumps
+        for jump in jumps:
+            jump["jump_rotations"] = jump.apply(
+                lambda row: (
+                    math.floor(row["jump_rotations"])
+                    if row["jump_type"] == "AXEL"
+                    and str(row["jump_rotations"]).endswith(".5")
+                    else row["jump_rotations"]
+                ),
+                axis=1,
+            )
         if st.session_state.user["role"] == "COACH":
             # Create the Streamlit selectbox
             selected_skater = st.sidebar.selectbox(
@@ -175,9 +187,15 @@ if "logged_in" in st.session_state:
             "Selectionnez un entraînement", training_dates
         )
         selected_jumps = jumps[jumps["training_date"] == selected_date]
-        create_histogram(selected_jumps)
-        create_timeline(selected_jumps)
-        create_frame(selected_jumps)
+        # Add checkboxes to filter the jumps by rotations
+        rotations = st.sidebar.multiselect(
+            "Selectionnez le nombre de rotations", [1, 2, 3, 4], default=[1, 2, 3, 4]
+        )
+        # Filter the jumps by the selected rotations
+        filtered_jumps = selected_jumps[selected_jumps["jump_rotations"].isin(rotations)]
+        create_histogram(filtered_jumps)
+        create_timeline(filtered_jumps)
+        create_frame(filtered_jumps)
     else:
         st.error("Vous devez être connecté pour accéder à cette page.")
         st.stop()
