@@ -23,8 +23,9 @@ def color_background(val):
 
 
 def create_recap_frame(data):
-    # Création du DataFrame récapitulatif : une colonne par type de saut, une ligne par nombre de rotations (1, 2, 3 et 4). Dans les cases, le pourcentage de réussite d'un tel saut (type + rotations)
-    recap = pd.DataFrame(index=[1, 2, 3, 4], columns=data["jump_type"].unique())
+    # Création du DataFrame récapitulatif : une colonne par type de saut, une ligne par nombre de rotations (Simple, Double, Triple, Quad)
+    recap = pd.DataFrame(index=["Simple", "Double", "Triple", "Quad"], columns=data["jump_type"].unique())
+    
     # Arrondir les jump_rotations à l'entier inférieur (pour les jump_type == AXEL)
     data["jump_rotations"] = data.apply(
         lambda row: (
@@ -34,6 +35,10 @@ def create_recap_frame(data):
         ),
         axis=1,
     )
+    
+    # Dictionnaire pour mapper les noms des rotations
+    rotation_mapping = {1: "Simple", 2: "Double", 3: "Triple", 4: "Quad"}
+
     for jump_type in data["jump_type"].unique():
         for rotations in [1, 2, 3, 4]:
             # Calcul du pourcentage de réussite
@@ -43,8 +48,8 @@ def create_recap_frame(data):
             # Laisser la case vide si aucune donnée n'est disponible
             if pd.isna(success_rate):
                 success_rate = ""
-            # Remplir la case du DataFrame récapitulatif en pourcentage (bien ecrire le signe %)
-            recap.loc[rotations, jump_type] = (
+            # Remplir la case du DataFrame récapitulatif en pourcentage (bien écrire le signe %)
+            recap.loc[rotation_mapping[rotations], jump_type] = (
                 f"{success_rate:.0%}" if success_rate != "" else ""
             )
     # Affichage du DataFrame récapitulatif
