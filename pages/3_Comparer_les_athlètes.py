@@ -28,10 +28,10 @@ def create_radar_athletes(filtered_datasets):
         },
         "radar": {
             "indicator": [
-                {"name": "Total de sauts", "max": max_jumps, "axisLabel": {"show": True}},
+                {"name": "Nombre de sauts", "max": max_jumps, "axisLabel": {"show": True}},
                 {"name": "Taux de réussite (%)", "max": 100, "min": 0, "axisLabel": {"show": True}},
                 {"name": "Vitesse angulaire max (tours/s)", "max": 6, "axisLabel": {"show": True}},
-                {"name": "Durée de saut(s)", "max": 1, "min": 0, "axisLabel": {"show": True}},
+                {"name": "Temps de vol(s)", "max": 1, "min": 0, "axisLabel": {"show": True}},
                 {"name": "Sauts par entraînement", "max": 50, "min": 0, "axisLabel": {"show": True}},
             ]
         },
