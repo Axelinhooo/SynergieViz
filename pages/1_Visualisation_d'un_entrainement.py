@@ -5,6 +5,8 @@ import streamlit as st
 from streamlit_echarts import st_echarts
 import math
 
+#mettre cette page en wide
+st.set_page_config(layout="wide")
 
 def create_histogram(data):
     st.markdown("### Répartition des sauts par type")
@@ -123,29 +125,29 @@ def create_frame(df):
     # Print a DataFrame but replace the column names with the French translation
     df_framed = df.rename(
         columns={
-            "jump_type": "Type de saut",
-            "jump_rotations": "Rotations",
-            "jump_length": "Durée du saut",
+            "jump_type": "Type saut",
+            "jump_rotations": "Rotations [tours]",
+            "jump_length": "Temps de vol [s]",
             "jump_success": "Succès",
-            "jump_time": "Temps",
-            "jump_max_speed": "Vitesse angulaire maximale",
+            "jump_time": "Temps [min:s]",
+            "jump_max_speed": "Vitesse angulaire maximale [tours/s]",
         }
     )
     # Ne garder que les colonnes ci dessus
     df_framed = df_framed[
         [
-            "Type de saut",
-            "Rotations",
-            "Durée du saut",
+            "Temps [min:s]",
+            "Rotations [tours]",
+            "Type saut",
+            "Temps de vol [s]",
+            "Vitesse angulaire maximale [tours/s]",
             "Succès",
-            "Temps",
-            "Vitesse angulaire maximale",
         ]
     ]
     #enlever la colonne index
     df_framed.reset_index(drop=True, inplace=True)
     # La colonne timestamp affiche un timestamp "1970-01-01 00:05:15" au lieu de "05:15" par exemple, on va donc la formater
-    df_framed["Temps"] = df_framed["Temps"].apply(lambda x: x.strftime("%M:%S"))
+    df_framed["Temps [min:s]"] = df_framed["Temps [min:s]"].apply(lambda x: x.strftime("%M:%S"))
     st.write(df_framed)
 
 
