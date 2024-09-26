@@ -1,8 +1,9 @@
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 import streamlit as st
+from streamlit_date_picker import date_range_picker, date_picker, PickerType
 
 from database.DatabaseManager import DatabaseManager
 
@@ -103,7 +104,27 @@ if "logged_in" in st.session_state:
             if selected_skater == i["skater_name"][0]:
                 jumps = i
                 break
-        create_recap_frame(jumps)
+
+        default_start, default_end = datetime.now() - timedelta(days=365), datetime.now()
+        refresh_value = timedelta(days=365)
+        st.markdown("### Sélectionner une période")
+        date_range_string = date_range_picker(picker_type=PickerType.date,
+                                            start=default_start, end=default_end,
+                                            key='date_range_picker',
+                                            refresh_button={'is_show': True, 'button_name': 'Sélectionner la dernière année',
+                                                            'refresh_value': refresh_value})
+        if date_range_string:
+            start, end = date_range_string
+            
+        # Filtrer les sauts par date
+        jumps_filtered = jumps[(jumps["training_date"] >= start) & (jumps["training_date"] <= end)]
+        
+        if jumps_filtered.empty:
+            st.error("Aucun saut n'a été enregistré pour cette période.")
+        else:
+            create_recap_frame(jumps_filtered)
+        
+    
         
     else:
         st.error("Vous devez être connecté pour accéder à cette page.")
