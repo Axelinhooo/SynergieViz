@@ -130,7 +130,7 @@ def create_frame(df):
             "jump_length": "Temps de vol [s]",
             "jump_success": "Succès",
             "jump_time": "Temps [min:s]",
-            "jump_max_speed": "Vitesse angulaire maximale [tours/s]",
+            "jump_max_speed": "Vitesse de rotation [tours/s]",
         }
     )
     # Ne garder que les colonnes ci dessus
@@ -140,7 +140,7 @@ def create_frame(df):
             "Rotations [tours]",
             "Type saut",
             "Temps de vol [s]",
-            "Vitesse angulaire maximale [tours/s]",
+            "Vitesse de rotation [tours/s]",
             "Succès",
         ]
     ]

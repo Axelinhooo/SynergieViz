@@ -13,13 +13,25 @@ def color_background(val):
     if val == "":
         return ""
     val = float(val.strip("%"))  # Convertir le pourcentage en nombre flottant
-    if val >= 85:
-        color = "#1a9641"
-    elif val >= 60:
-        color = "#ffff5f"
-    else:
-        color = "#d7191c"
-    return f"background-color: {color}"
+    # Dégradé : 100% -> #00d900, 0% -> #d90000, 50% -> #d9d900 : faire le dégradé entre les couleurs
+    r = int(217 - (217 * val) / 100)
+    g = int(217 * val / 100)
+    b = 0
+    return f"background-color: #{r:02x}{g:02x}{b:02x}"
+
+def test_color_background():
+    # Faire un tableau avec des valeurs de 0 à 100 par pas de 10
+    test_df = pd.DataFrame(
+        {
+            "0": [f"{i}%" for i in range(0, 101, 10)],
+            "1": [f"{i}%" for i in range(0, 101, 10)],
+            "2": [f"{i}%" for i in range(0, 101, 10)],
+            "3": [f"{i}%" for i in range(0, 101, 10)],
+        }
+    )
+    # Appliquer la fonction color_background à chaque cellule du DataFrame
+    styled_test_df = test_df.style.applymap(color_background)
+    return styled_test_df
 
 
 def create_recap_frame(data):
@@ -52,6 +64,19 @@ def create_recap_frame(data):
             recap.loc[rotation_mapping[rotations], jump_type] = (
                 f"{success_rate:.0%}" if success_rate != "" else ""
             )
+
+    # Classer les colonnes : Axel, Salchow, Toe Loop, Loop, Flip, Lutz
+    recap = recap[
+        [
+            "AXEL",
+            "SALCHOW",
+            "TOE_LOOP",
+            "LOOP",
+            "FLIP",
+            "LUTZ",
+        ]
+    ]
+    
     # Affichage du DataFrame récapitulatif
     styled_recap = recap.style.applymap(color_background)
 
@@ -79,6 +104,7 @@ if "logged_in" in st.session_state:
                 jumps = i
                 break
         create_recap_frame(jumps)
+        
     else:
         st.error("Vous devez être connecté pour accéder à cette page.")
         st.stop()
