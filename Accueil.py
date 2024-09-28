@@ -52,12 +52,14 @@ def load_data(skater_id):
 
     for training in trainings:
         jump_df = pd.DataFrame(training.training_jumps)
-        jump_df["training_date"] = [training.training_date] * len(jump_df)
+        jump_df["training_date"] = pd.to_datetime([training.training_date] * len(jump_df), unit="s")
         jump_df["skater_name"] = [skatername] * len(jump_df)
         if all_jumps_df.empty:
             all_jumps_df = jump_df
         else:
             all_jumps_df = pd.concat([all_jumps_df, jump_df], ignore_index=True)
+
+    
 
     return training_df, all_jumps_df
 

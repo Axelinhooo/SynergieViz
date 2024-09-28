@@ -86,6 +86,53 @@ def create_recap_frame(data):
     )
     st.write(styled_recap)
 
+def create_recap_total(data):
+    # Creer un tableau qui contient le nombre de sauts par type et par nombre de rotations
+    recap = pd.DataFrame(index=["Simple", "Double", "Triple", "Quad"], columns=data["jump_type"].unique())
+
+    # Arrondir les jump_rotations à l'entier inférieur (pour les jump_type == AXEL)
+    data["jump_rotations"] = data.apply(
+        lambda row: (
+            math.floor(row["jump_rotations"])
+            if row["jump_type"] == "AXEL" and str(row["jump_rotations"]).endswith(".5")
+            else row["jump_rotations"]
+        ),
+        axis=1,
+    )
+
+    # Dictionnaire pour mapper les noms des rotations
+    rotation_mapping = {1: "Simple", 2: "Double", 3: "Triple", 4: "Quad"}
+
+    for jump_type in data["jump_type"].unique():
+        for rotations in [1, 2, 3, 4]:
+            # Calcul du nombre de sauts
+            count = data[
+                (data["jump_type"] == jump_type) & (data["jump_rotations"] == rotations)
+            ].shape[0]
+            # Laisser la case vide si aucune donnée n'est disponible
+            if pd.isna(count):
+                count = ""
+            # Remplir la case du DataFrame récapitulatif en pourcentage (bien écrire le signe %)
+            recap.loc[rotation_mapping[rotations], jump_type] = count
+
+    # Classer les colonnes : Axel, Salchow, Toe Loop, Loop, Flip, Lutz
+    recap = recap[
+        [
+            "AXEL",
+            "SALCHOW",
+            "TOE_LOOP",
+            "LOOP",
+            "FLIP",
+            "LUTZ",
+        ]
+    ]
+
+
+    st.markdown(
+        "### Nombre de sauts par type de saut et par nombre de rotations"
+    )
+    st.write(recap)
+
 
 if "logged_in" in st.session_state:
     if st.session_state.logged_in:
@@ -115,7 +162,8 @@ if "logged_in" in st.session_state:
                                                             'refresh_value': refresh_value})
         if date_range_string:
             start, end = date_range_string
-            
+
+        jumps    
         # Filtrer les sauts par date
         jumps_filtered = jumps[(jumps["training_date"] >= start) & (jumps["training_date"] <= end)]
         
@@ -123,6 +171,7 @@ if "logged_in" in st.session_state:
             st.error("Aucun saut n'a été enregistré pour cette période.")
         else:
             create_recap_frame(jumps_filtered)
+            create_recap_total(jumps_filtered)
         
     
         
