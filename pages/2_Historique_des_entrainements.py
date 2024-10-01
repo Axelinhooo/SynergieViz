@@ -163,7 +163,6 @@ if "logged_in" in st.session_state:
         if date_range_string:
             start, end = date_range_string
 
-        jumps    
         # Filtrer les sauts par date
         jumps_filtered = jumps[(jumps["training_date"] >= start) & (jumps["training_date"] <= end)]
         
