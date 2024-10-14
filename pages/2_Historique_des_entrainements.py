@@ -136,6 +136,9 @@ def create_recap_total(data):
 
 if "logged_in" in st.session_state:
     if st.session_state.logged_in:
+        if st.session_state.user["role"] == "ATHLETE" and st.session_state.jumps[0].empty:
+            st.error("Désolé, il n'y a pas de données à afficher. Veuillez enregistrer un entraînement pour commencer à visualiser les données.")
+            st.stop()
         if st.session_state.user["role"] == "COACH":
             selected_skater = st.sidebar.selectbox(
                 "Sélectionner un athlète", st.session_state.skater_names

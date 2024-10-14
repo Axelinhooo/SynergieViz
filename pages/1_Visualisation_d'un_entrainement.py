@@ -151,9 +151,12 @@ def create_frame(df):
     st.write(df_framed)
 
 
-if "logged_in" in st.session_state:
+if "logged_in" in st.session_state: 
     if st.session_state.logged_in:
         jumps = st.session_state.jumps
+        if st.session_state.user["role"] == "ATHLETE" and jumps[0].empty:
+            st.error("Désolé, il n'y a pas de données à afficher. Veuillez enregistrer un entraînement pour commencer à visualiser les données.")
+            st.stop()
         for jump in jumps:
             jump["jump_rotations"] = jump.apply(
                 lambda row: (
@@ -180,6 +183,13 @@ if "logged_in" in st.session_state:
             if selected_skater == i["skater_name"][0]:
                 jumps = i
                 break
+            else:
+                #jumps vide
+                jumps = pd.DataFrame()
+        if jumps.empty:
+            st.error("Désolé, il n'y a pas de données à afficher. Veuillez enregistrer un entraînement pour commencer à visualiser les données.")
+            st.stop()       
+
         # convert the timestamps in the column to datetime objects
         jumps["training_date"] = pd.to_datetime(jumps["training_date"], unit="s")
 

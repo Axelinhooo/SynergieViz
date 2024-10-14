@@ -42,24 +42,26 @@ def is_valid_password(password):
 def load_data(skater_id):
     # Charger les trainings de l'athlète sélectionné
     trainings = db.get_all_trainings_for_skater(skater_id)
+    if trainings:
+        # Créer un dataframe pour les trainings
+        training_df = pd.DataFrame([vars(t) for t in trainings])
 
-    # Créer un dataframe pour les trainings
-    training_df = pd.DataFrame([vars(t) for t in trainings])
+        # Charger les jumps liés à ces trainings
+        skatername = db.get_skater_name_from_training_id(trainings[0].training_id)
+        all_jumps_df = pd.DataFrame()
 
-    # Charger les jumps liés à ces trainings
-    skatername = db.get_skater_name_from_training_id(trainings[0].training_id)
-    all_jumps_df = pd.DataFrame()
+        for training in trainings:
+            jump_df = pd.DataFrame(training.training_jumps)
+            jump_df["training_date"] = pd.to_datetime([training.training_date] * len(jump_df), unit="s")
+            jump_df["skater_name"] = [skatername] * len(jump_df)
+            if all_jumps_df.empty:
+                all_jumps_df = jump_df
+            else:
+                all_jumps_df = pd.concat([all_jumps_df, jump_df], ignore_index=True)
 
-    for training in trainings:
-        jump_df = pd.DataFrame(training.training_jumps)
-        jump_df["training_date"] = pd.to_datetime([training.training_date] * len(jump_df), unit="s")
-        jump_df["skater_name"] = [skatername] * len(jump_df)
-        if all_jumps_df.empty:
-            all_jumps_df = jump_df
-        else:
-            all_jumps_df = pd.concat([all_jumps_df, jump_df], ignore_index=True)
-
-    
+    else:
+        training_df = pd.DataFrame()
+        all_jumps_df = pd.DataFrame()    
 
     return training_df, all_jumps_df
 
@@ -89,8 +91,9 @@ if st.session_state.logged_in:
             all_jump_data = []
             for athlete in st.session_state.user["access"]:
                 training_df, jump_df = load_data(athlete)
-                all_training_data.append(training_df)
-                all_jump_data.append(jump_df)
+                if training_df.shape[0] > 0 and jump_df.shape[0] > 0:
+                    all_training_data.append(training_df)
+                    all_jump_data.append(jump_df)
             st.session_state.trainings = all_training_data
             st.session_state.jumps = all_jump_data
             all_skaters = db.get_all_skaters_from_access(

@@ -160,54 +160,57 @@ if "logged_in" in st.session_state:
         access = st.session_state.user["access"]
         role = st.session_state.user["role"]
         jumps = st.session_state.jumps
-
-        # Add a jump_type filter
-        jump_types = []
-        for jump in jumps:
-            jump_types.extend(jump["jump_type"].unique())
-        jump_types = list(set(jump_types))
-        selected_jump_type = st.sidebar.selectbox(
-            "Sélectionner un type de saut", jump_types
-        )
-
-        # Add an angular_velocity column
-        for jump in jumps:
-            jump["angular_velocity"] = jump["jump_rotations"] / jump["jump_length"]
-
-        for jump in jumps:
-            jump["jump_rotations"] = jump.apply(
-                lambda row: (
-                    math.floor(row["jump_rotations"])
-                    if row["jump_type"] == "AXEL"
-                    and str(row["jump_rotations"]).endswith(".5")
-                    else row["jump_rotations"]
-                ),
-                axis=1,
+            
+        # S'assurer que chaque tableau de jump est non vide
+        if all([jump.shape[0] > 0 for jump in jumps]):
+            # Add a jump_type filter
+            jump_types = []
+            for jump in jumps:
+                jump_types.extend(jump["jump_type"].unique())
+            jump_types = list(set(jump_types))
+            selected_jump_type = st.sidebar.selectbox(
+                "Sélectionner un type de saut", jump_types
             )
 
-        # Add a jump_rotations filter
-        jump_rotations = []
-        for jump in jumps:
-            jump_rotations.extend(jump["jump_rotations"].unique())
-        jump_rotations = list(set(jump_rotations))
-        selected_jump_rotations = st.sidebar.selectbox(
-            "Sélectionner un nombre de rotations", jump_rotations
-        )
+            # Add an angular_velocity column
+            for jump in jumps:
+                jump["angular_velocity"] = jump["jump_rotations"] / jump["jump_length"]
 
-        # Filter the datasets
-        filtered_datasets = []
-        for jump in jumps:
-            filtered_jump = jump[
-                (jump["jump_type"] == selected_jump_type)
-                & 
-                (jump["jump_rotations"] == selected_jump_rotations)
-            ]
-            filtered_datasets.append(filtered_jump)
-        
-        create_radar_athletes(filtered_datasets)
-        create_line_chart(filtered_datasets)
-        # create_radar_types(filtered_datasets)
+            for jump in jumps:
+                jump["jump_rotations"] = jump.apply(
+                    lambda row: (
+                        math.floor(row["jump_rotations"])
+                        if row["jump_type"] == "AXEL"
+                        and str(row["jump_rotations"]).endswith(".5")
+                        else row["jump_rotations"]
+                    ),
+                    axis=1,
+                )
 
+            # Add a jump_rotations filter
+            jump_rotations = []
+            for jump in jumps:
+                jump_rotations.extend(jump["jump_rotations"].unique())
+            jump_rotations = list(set(jump_rotations))
+            selected_jump_rotations = st.sidebar.selectbox(
+                "Sélectionner un nombre de rotations", jump_rotations
+            )
+
+            # Filter the datasets
+            filtered_datasets = []
+            for jump in jumps:
+                filtered_jump = jump[
+                    (jump["jump_type"] == selected_jump_type)
+                    & 
+                    (jump["jump_rotations"] == selected_jump_rotations)
+                ]
+                filtered_datasets.append(filtered_jump)
+            
+            create_radar_athletes(filtered_datasets)
+            create_line_chart(filtered_datasets)
+            # create_radar_types(filtered_datasets)
+        else:
+            st.error("Désolé, il n'y a pas de données à afficher. Veuillez enregistrer un entraînement pour commencer à visualiser les données.")
     else:
         st.error("Vous devez être connecté pour accéder à cette page.")
         st.stop()
